@@ -14,15 +14,18 @@
         <li><a href="#running-split">Running split</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
+    <li>
+      <a href="#design-overview">Design Overview</a>
+      <ul>
+        <li><a href="#main">main()</a></li>
+        <li><a href="#openfile">openFile()</a></li>
+        <li><a href="#split">split()</a><li>
+        <li><a href="#finalexit">finalExit()</a><li>
+      </ul>
+    </li>
+    <li><a href="#performance-considerations">Performance Considerations</a></li>
   </ol>
 </details>
-
 
 
 
@@ -30,9 +33,13 @@
 
 Split takes a delimiter character and a list of files as input. It replaces each instance of the delimiter character with a newline, splitting the file.
 
+
+
 ## How To Use split
 
 Split's executable needs to be built first, then it can be run with the terminal.
+
+
 
 ### Building split
 
@@ -50,131 +57,89 @@ Split's executable needs to be built first, then it can be run with the terminal
   ```
 
 
+
 ### Running split
 
   This command runs split on all the files listed and uses the delimiter x.
   ```sh
   $ ./split x file1 file2 file3 ...
   ```
-  * Using '-' as a filename causes it to read stdin instead of the file named '-'.
+  * Using '-' as a filename causes it to read STDIN instead of the file named '-'.
   * Dash can only be used once in the list of input files
   * split works on binary input files
   * split only supports single-character delimiters  
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
+
+
 ## Design Overview
   
-  My implementation of split has 4 parts
+  My implementation of split has 4 parts:
   1. int main(int argc, char *argv[]);
   2. int openFile(char *filename);
   3. int split(int file_descriptor, char *delimiter);
   4. int finalExit();
 
+
+
 ### main()
+
   ```sh
   int main(int argc, char *argv[]);
   ```
+  
   main handles error cases and the calling of split() for every file, and also running finalExit() at the end of the program.
   finalExit() exits the program with the last error code produced by the file inputs.
   main handles the not enough arguments error by checking the count of arguments using the value of argc <=2, because you need 3 arguments in order to start split.
   main calls openFile() on each file argument, and passes the file descriptor value from openFile() to run split(), and lastly, runs finalExit().
   
+  
+  
 ### openFile()
+
   ```sh
   int openFile(char *filename);
   ```
   
+  openFile() handles the opening of the file arguments in
   
-  
-  
-  
-  
-  
-### int split(int file_descriptor, char *delimiter); 
+  ```sh
+  $ ./split (delimiter character) file1 file2 file3 ...
+  ```
 
-### int finalExit();
-
-
+  openFile uses open() to open the files in read-only mode, and returns the file descriptor value from open().
+  It also handles the error case where the file doesn't exist and the file permissions are denied, errno:2 and errno:13 from open().
+  The reference split implementation skips file errors to process all of the files. I implemented this through saving the error codes that open() returns to a global int that saves the last error code for finalExit(). I also pass the file descriptor value as the minimum value of int to mark it as a  file to skip when split() runs with this file descriptor. finalExit() is called after processing all the file inputs to return the last error code to the terminal.
 
 
 
+### split()
+
+  ```sh
+  int split(int file_descriptor, char *delimiter); 
+  ```
+  
+  split() handles the functionality of replacing the delimiter character with a newline. If there was an error detected by openFile(), split() will read the INT_MIN marker value placed in the file descriptor by openFile() and return out of the function to skip processing the faulty file. 
+  
+  split() also checks if the delimiter is longer than 1 character by placing the terminal input into a buffer and checking the length of it with strlen(). 
+  
+  split() uses large buffers that are 4096 bytes long to read large blocks of characters from files. This reduces the amount of times that a file will be accessed, making split() more efficient. In addition, split() uses unsigned char buffers to accommodate binary file input data. I also check the character values for the delimiter replacement with a == comparator which does not rely on formatted c-strings or null characters.
+  
+  
+  
+### finalExit()
+  ```sh
+  int finalExit();
+  ```
+  This function returns the last error code detected by OpenFile(), and matches the reference implementation's functionality of sending the last error code detected to the console.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
 
+### Performance Considerations
 
-
-
-<!-- CONTRIBUTING -->
-## Contributing
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+  The slowest process of my program would be the reading of files and writing to the console. I use large buffer sizes of 4KB to read in large chunks of input files quickly, instead of reading 1 character of the file at a time. I also use these large buffers to write the results of split() to STDOUT in the terminal.   The use of large buffers cuts down on the number of writes to the terminal. I also do not use malloc() and free() for the read buffer, I used a static unsigned char buffer array instead. This removes the possibility of memory leaks in my program.  
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-<!-- LICENSE -->
-## License
-
-Distributed under the MIT License. See `LICENSE.txt` for more information.
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-<!-- CONTACT -->
-## Contact
-
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
-
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
-
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
-* [Malven's Grid Cheatsheet](https://grid.malven.co/)
-* [Img Shields](https://shields.io)
-* [GitHub Pages](https://pages.github.com)
-* [Font Awesome](https://fontawesome.com)
-* [React Icons](https://react-icons.github.io/react-icons/search)
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
-[product-screenshot]: images/screenshot.png
