@@ -8,7 +8,7 @@
       <a href="#about-split">About split</a>
     </li>
     <li>
-      <a href="#how-to-use-split">Getting Started</a>
+      <a href="#how-to-use-split">How To Use split</a>
       <ul>
         <li><a href="#building-split">Building split</a></li>
         <li><a href="#running-split">Running split</a></li>
