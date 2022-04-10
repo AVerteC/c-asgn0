@@ -146,6 +146,6 @@ Split's executable needs to be built first, then it can be run with the terminal
 
 ### Performance Considerations
 
-  The slowest process of my program is the reading of files and writing to the console. I chose to use large buffer sizes of 4KB to read in large chunks of input files quickly, instead of calling read() on every individual character of the file. I also use these large buffers to write the results of split() to STDOUT in the terminal.   The use of large buffers cuts down on the number of writes to the terminal. I also do not use malloc() and free() for the read buffer, I used a static unsigned char buffer array instead. This removes the possibility of memory leaks in my program.  
+  The slowest process of my program is the reading of files and writing to the console. I chose to use large buffer sizes of 4KB to read in large chunks of input files quickly, instead of calling read() on every individual character of the file. I also use these large buffers to write the results of split() to STDOUT in the terminal.   The use of large output buffers optimizes the number of writes to the terminal. Additionally, I used a static unsigned char buffer array instead of dynamically allocating memory with malloc() and free() for the read buffer. This removes the possibility of memory leaks in my program and allows it to support binary files.  
 
 <p align="right">(<a href="#top">back to top</a>)</p>
