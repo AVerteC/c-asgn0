@@ -115,6 +115,8 @@ split is compiled with C version `C99` using the flags `-Wall -Wextra -Werror -p
 
   openFile() uses open() to open the files in read-only mode and returns the file descriptor value from open().
   It also handles the error case where the file doesn't exist and the file permissions are denied, errno:2 and errno:13 from open().
+  
+  
   The reference split implementation skips file errors to process all of the files and returns the last error code detected. I implemented the same functionality by saving the error codes that open() returns to a global int that saves the last error code. I also pass the file descriptor value as the minimum value of int to mark it as a file to skip when split() runs with a file descriptor belonging to a faulty file. 
 
 
@@ -147,6 +149,6 @@ split is compiled with C version `C99` using the flags `-Wall -Wextra -Werror -p
 
 ### Performance and Optimization Considerations
 
-  The slowest process of my program is the reading of files and writing to the console. I chose to use large buffer sizes of 4KB to read in large chunks of input files quickly, instead of calling read() on every individual character of the file. I also use these large buffers to write the results of split() to STDOUT in the terminal.   The use of large output buffers optimizes the number of writes to the terminal. Additionally, I used a static unsigned char buffer array instead of dynamically allocating memory with malloc() and free() for the read buffer. This allows my program to support binary files, while also removing the possibility of memory leaks in my program. My program also closes file descriptors after it is done processing files with split(), preventing the program from running out of file descriptors. 
+  The slowest process of my program is the reading of files and writing to the console. I chose to use large buffer sizes of 4KB to read in large chunks of input files quickly, instead of calling read() on every individual character of the file. I also use these large buffers to write the results of split() to STDOUT in the terminal. The use of large output buffers optimizes the number of writes to the terminal. Additionally, I used a static unsigned char buffer array instead of dynamically allocating memory with malloc() and free() for the read buffer. This allows my program to support binary files, while also removing the possibility of memory leaks in my program. My program also closes file descriptors after it is done processing files with split(), preventing the program from running out of file descriptors. 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
