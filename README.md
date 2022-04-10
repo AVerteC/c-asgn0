@@ -19,8 +19,8 @@
       <ul>
         <li><a href="#main">main()</a></li>
         <li><a href="#openfile">openFile()</a></li>
-        <li><a href="#split">split()</a><li>
-        <li><a href="#finalexit">finalExit()</a><li>
+        <li><a href="#split">split()</a></li>
+        <li><a href="#finalexit">finalExit()</a></li>
       </ul>
     </li>
     <li><a href="#performance-considerations">Performance Considerations</a></li>
