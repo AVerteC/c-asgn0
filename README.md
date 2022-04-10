@@ -64,7 +64,7 @@ Split's executable needs to be built first, then it can be run with the terminal
   ```sh
   $ ./split x file1 file2 file3 ...
   ```
-  * You can use a dash '-' as a filename, allowing split to read STDIN as an input.
+  * You can use a dash '-' instead of a filename, allowing split to read STDIN as an input.
   * Dash can only be used once in the list of input files
   * split works on binary input files
   * split only supports single-character delimiters  
