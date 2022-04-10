@@ -43,6 +43,8 @@ Split's executable needs to be built first, then it can be run with the terminal
 
 ### Building split
 
+split is compiled with C version `C99` using the flags `-Wall -Wextra -Werror -pedantic`.
+
 * To build all executables for split run:
   ```sh
   $ make
@@ -92,7 +94,7 @@ Split's executable needs to be built first, then it can be run with the terminal
   main() calls split() on every file, runs finalExit() at the end of the program, and handles errors from invalid inputs.
   finalExit() exits the program with the last error code produced by the file inputs.
   main() handles the following input validations:
-  * `Not enough arguments`: by checking the count of arguments using the value of argc <=2, because you need 3 arguments in order to start split.
+  * `Not enough arguments`: by checking the count of arguments using the value of argc <=2, because you need at least 3 arguments in order to start split. These arguments include `./split <delimiter> <file>`.
 
 
   main() calls openFile() on each file argument and passes the file descriptor value from openFile() to run split(), and lastly, runs finalExit().
@@ -127,7 +129,7 @@ Split's executable needs to be built first, then it can be run with the terminal
   
   split() also checks if the delimiter is longer than 1 character by checking the length of it with strlen(). 
   
-  split() uses large buffers that are 4096 bytes long to read large blocks of characters from files. This reduces the amount of times that a file will be accessed, making split() more efficient. In addition, split() uses unsigned char buffers to accommodate binary file input data. I also check the character values for the delimiter replacement with a == comparator which allows for both signed and unsigned characters as delimiters.
+  split() uses large buffers that are 4096 bytes long to read large blocks of characters from files. This reduces the amount of times that a file will be accessed, making split() more efficient. In addition, split() uses unsigned char buffers to accommodate binary file input data. I also check the character values for the delimiter replacement with a == comparator which allows for both signed and unsigned characters as delimiters. split() closes the file descriptor after it is done reading from the file, so that the program doesn't run out of file descriptors.
   
   
   
@@ -145,6 +147,6 @@ Split's executable needs to be built first, then it can be run with the terminal
 
 ### Performance and Optimization Considerations
 
-  The slowest process of my program is the reading of files and writing to the console. I chose to use large buffer sizes of 4KB to read in large chunks of input files quickly, instead of calling read() on every individual character of the file. I also use these large buffers to write the results of split() to STDOUT in the terminal.   The use of large output buffers optimizes the number of writes to the terminal. Additionally, I used a static unsigned char buffer array instead of dynamically allocating memory with malloc() and free() for the read buffer. This allows my program to support binary files, while also removing the possibility of memory leaks in my program.  
+  The slowest process of my program is the reading of files and writing to the console. I chose to use large buffer sizes of 4KB to read in large chunks of input files quickly, instead of calling read() on every individual character of the file. I also use these large buffers to write the results of split() to STDOUT in the terminal.   The use of large output buffers optimizes the number of writes to the terminal. Additionally, I used a static unsigned char buffer array instead of dynamically allocating memory with malloc() and free() for the read buffer. This allows my program to support binary files, while also removing the possibility of memory leaks in my program. My program also closes file descriptors after it is done processing files with split(), preventing the program from running out of file descriptors. 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
