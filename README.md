@@ -89,10 +89,10 @@ Split's executable needs to be built first, then it can be run with the terminal
   int main(int argc, char *argv[]);
   ```
   
-  main handles error cases and the calling of split() for every file, and also running finalExit() at the end of the program.
+  main() handles error cases and the calling of split() for every file, and also running finalExit() at the end of the program.
   finalExit() exits the program with the last error code produced by the file inputs.
-  main handles the not enough arguments error by checking the count of arguments using the value of argc <=2, because you need 3 arguments in order to start split.
-  main calls openFile() on each file argument, and passes the file descriptor value from openFile() to run split(), and lastly, runs finalExit().
+  main() handles the not enough arguments error by checking the count of arguments using the value of argc <=2, because you need 3 arguments in order to start split.
+  main() calls openFile() on each file argument, and passes the file descriptor value from openFile() to run split(), and lastly, runs finalExit().
   
   
   
@@ -108,7 +108,7 @@ Split's executable needs to be built first, then it can be run with the terminal
   $ ./split (delimiter character) file1 file2 file3 ...
   ```
 
-  openFile uses open() to open the files in read-only mode, and returns the file descriptor value from open().
+  openFile() uses open() to open the files in read-only mode, and returns the file descriptor value from open().
   It also handles the error case where the file doesn't exist and the file permissions are denied, errno:2 and errno:13 from open().
   The reference split implementation skips file errors to process all of the files. I implemented this through saving the error codes that open() returns to a global int that saves the last error code for finalExit(). I also pass the file descriptor value as the minimum value of int to mark it as a  file to skip when split() runs with this file descriptor. finalExit() is called after processing all the file inputs to return the last error code to the terminal.
 
@@ -132,7 +132,7 @@ Split's executable needs to be built first, then it can be run with the terminal
   ```sh
   int finalExit();
   ```
-  This function returns the last error code detected by OpenFile(), and matches the reference implementation's functionality of sending the last error code detected to the console.
+  This function returns the last error code detected by openFile(), and matches the reference implementation's functionality of sending the last error code detected to the console.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -140,6 +140,6 @@ Split's executable needs to be built first, then it can be run with the terminal
 
 ### Performance Considerations
 
-  The slowest process of my program would be the reading of files and writing to the console. I use large buffer sizes of 4KB to read in large chunks of input files quickly, instead of reading 1 character of the file at a time. I also use these large buffers to write the results of split() to STDOUT in the terminal.   The use of large buffers cuts down on the number of writes to the terminal. I also do not use malloc() and free() for the read buffer, I used a static unsigned char buffer array instead. This removes the possibility of memory leaks in my program.  
+  The slowest process of my program would be the reading of files and writing to the console. I use large buffer sizes of 4KB to read in large chunks of input files quickly, instead of reading one character of the file at a time. I also use these large buffers to write the results of split() to STDOUT in the terminal.   The use of large buffers cuts down on the number of writes to the terminal. I also do not use malloc() and free() for the read buffer, I used a static unsigned char buffer array instead. This removes the possibility of memory leaks in my program.  
 
 <p align="right">(<a href="#top">back to top</a>)</p>
