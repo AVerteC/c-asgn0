@@ -23,7 +23,7 @@
         <li><a href="#finalexit">finalExit()</a></li>
       </ul>
     </li>
-    <li><a href="#performance-considerations">Performance Considerations</a></li>
+    <li><a href="#performance-and-optimization-considerations">Performance and Optimization Considerations</a></li>
   </ol>
 </details>
 
@@ -144,8 +144,8 @@ Split's executable needs to be built first, then it can be run with the terminal
 
 
 
-### Performance Considerations
+### Performance and Optimization Considerations
 
-  The slowest process of my program is the reading of files and writing to the console. I chose to use large buffer sizes of 4KB to read in large chunks of input files quickly, instead of calling read() on every individual character of the file. I also use these large buffers to write the results of split() to STDOUT in the terminal.   The use of large output buffers optimizes the number of writes to the terminal. Additionally, I used a static unsigned char buffer array instead of dynamically allocating memory with malloc() and free() for the read buffer. This removes the possibility of memory leaks in my program and allows it to support binary files.  
+  The slowest process of my program is the reading of files and writing to the console. I chose to use large buffer sizes of 4KB to read in large chunks of input files quickly, instead of calling read() on every individual character of the file. I also use these large buffers to write the results of split() to STDOUT in the terminal.   The use of large output buffers optimizes the number of writes to the terminal. Additionally, I used a static unsigned char buffer array instead of dynamically allocating memory with malloc() and free() for the read buffer. This allows my program to support binary files, while also removing the possibility of memory leaks in my program.  
 
 <p align="right">(<a href="#top">back to top</a>)</p>
