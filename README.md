@@ -31,7 +31,7 @@
 
 ## About split
 
-Split takes a delimiter character and a list of files as input. It replaces each instance of the delimiter character with a newline, splitting the file.
+Split takes a delimiter character and a list of files as input. It replaces each instance of the delimiter character with a newline for each of the files in the list, splitting the file contents and printing it out to STDOUT.
 
 
 
