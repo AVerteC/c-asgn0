@@ -120,8 +120,8 @@ split is compiled with C version `C99` using the flags `-Wall -Wextra -Werror -p
   
   
   It also handles the error cases:
-   * file doesn't exist - `errno:2` from open()
-   * the file permissions are denied - `errno:13` from open().
+   * `No such file or directory` - `errno:2` from open()
+   * `unreadable: Permission denied` - `errno:13` from open().
   
   
   The reference split implementation skips file errors to process all of the files and returns the last error code detected. I implemented the same functionality by saving the error codes that open() returns to a global int that saves the last error code. I also pass the file descriptor value as the minimum value of int to mark it as a file to skip when split() runs with a file descriptor belonging to a faulty file. 
@@ -137,7 +137,10 @@ split is compiled with C version `C99` using the flags `-Wall -Wextra -Werror -p
   split() handles the functionality of replacing the delimiter character with a newline. If there was an error detected by openFile(), split() will read the INT_MIN marker value placed in the file descriptor by openFile() and return out of the function to skip processing the faulty file. 
   
   
-  split() uses large buffers that are 4096 bytes long to read large blocks of characters from files. This reduces the amount of times that a file will be accessed, making split() more efficient. In addition, split() uses unsigned char buffers to accommodate binary file input data. I also check the character values for the delimiter replacement with a == comparator which allows for both signed and unsigned characters as delimiters. split() closes the file descriptor after it is done reading from the file, so that the program doesn't run out of file descriptors.
+  split() uses large buffers that are 4096 bytes long to read large blocks of characters from files. This reduces the amount of times that a file will be accessed, making split() more efficient. In addition, split() uses unsigned char buffers to accommodate binary file input data. I also check the character values for the delimiter replacement with a == comparator which allows for both signed and unsigned characters as delimiters. 
+  
+  
+  split() closes the file descriptor after it is done reading from the file, so that the program doesn't run out of file descriptors.
   
   
   
