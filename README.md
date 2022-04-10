@@ -65,7 +65,7 @@ Split's executable needs to be built first, then it can be run with the terminal
   $ ./split <delimiter> <file1> <file2> <file3> ... <file n>
   ```
   * You can use a dash `-` instead of a filename, allowing split to read STDIN as an input.
-  * Dash `-` can only be used once in the list of input files
+  * Assumme dash `-` is only used once in the list of input files
   * split works on binary input files
   * split only supports single-character delimiters  
 
@@ -93,7 +93,6 @@ Split's executable needs to be built first, then it can be run with the terminal
   finalExit() exits the program with the last error code produced by the file inputs.
   main() handles the following input validations:
   * `Not enough arguments`: by checking the count of arguments using the value of argc <=2, because you need 3 arguments in order to start split.
-  * Multiple instances of dash filename `-`: by counting the instances detected in the file arguments before running openFile() or split() 
 
 
   main() calls openFile() on each file argument and passes the file descriptor value from openFile() to run split(), and lastly, runs finalExit().
