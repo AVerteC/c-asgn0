@@ -60,9 +60,9 @@ Split's executable needs to be built first, then it can be run with the terminal
 
 ### Running split
 
-  This command uses the delimiter x and runs split on all the files.
+  This command uses the delimiter and runs split on all the files.
   ```sh
-  $ ./split x file1 file2 file3 ...
+  $ ./split <delimiter> <file1> <file2> <file3> ... <file n>
   ```
   * You can use a dash `-` instead of a filename, allowing split to read STDIN as an input.
   * Dash `-` can only be used once in the list of input files
