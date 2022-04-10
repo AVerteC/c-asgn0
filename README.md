@@ -93,7 +93,9 @@ split is compiled with C version `C99` using the flags `-Wall -Wextra -Werror -p
   
   main() calls split() on every file, runs finalExit() at the end of the program, and handles errors from invalid inputs.
   finalExit() exits the program with the last error code produced by the file inputs.
-  main() also checks if the delimiter is longer than 1 character by checking the length of it with strlen(). 
+  main() also checks if the delimiter is longer than 1 character by checking the length of it with strlen().
+  
+  
   main() handles the following input validations:
   * `Not enough arguments`: by checking the count of arguments using the value of argc <=2, because you need at least 3 arguments in order to start split. These arguments include `./split <delimiter> <file>`.
 
@@ -115,7 +117,11 @@ split is compiled with C version `C99` using the flags `-Wall -Wextra -Werror -p
   ```
 
   openFile() uses open() to open the files in read-only mode and returns the file descriptor value from open().
-  It also handles the error case where the file doesn't exist and the file permissions are denied, errno:2 and errno:13 from open().
+  
+  
+  It also handles the error cases:
+   * file doesn't exist - `errno:2` from open()
+   * the file permissions are denied - `errno:13` from open().
   
   
   The reference split implementation skips file errors to process all of the files and returns the last error code detected. I implemented the same functionality by saving the error codes that open() returns to a global int that saves the last error code. I also pass the file descriptor value as the minimum value of int to mark it as a file to skip when split() runs with a file descriptor belonging to a faulty file. 
