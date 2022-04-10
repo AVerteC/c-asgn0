@@ -93,6 +93,7 @@ split is compiled with C version `C99` using the flags `-Wall -Wextra -Werror -p
   
   main() calls split() on every file, runs finalExit() at the end of the program, and handles errors from invalid inputs.
   finalExit() exits the program with the last error code produced by the file inputs.
+  main() also checks if the delimiter is longer than 1 character by checking the length of it with strlen(). 
   main() handles the following input validations:
   * `Not enough arguments`: by checking the count of arguments using the value of argc <=2, because you need at least 3 arguments in order to start split. These arguments include `./split <delimiter> <file>`.
 
@@ -129,7 +130,6 @@ split is compiled with C version `C99` using the flags `-Wall -Wextra -Werror -p
   
   split() handles the functionality of replacing the delimiter character with a newline. If there was an error detected by openFile(), split() will read the INT_MIN marker value placed in the file descriptor by openFile() and return out of the function to skip processing the faulty file. 
   
-  split() also checks if the delimiter is longer than 1 character by checking the length of it with strlen(). 
   
   split() uses large buffers that are 4096 bytes long to read large blocks of characters from files. This reduces the amount of times that a file will be accessed, making split() more efficient. In addition, split() uses unsigned char buffers to accommodate binary file input data. I also check the character values for the delimiter replacement with a == comparator which allows for both signed and unsigned characters as delimiters. split() closes the file descriptor after it is done reading from the file, so that the program doesn't run out of file descriptors.
   
