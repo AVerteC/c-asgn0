@@ -286,37 +286,6 @@ To write to the file, log_response() opens the file in write mode, then uses fpr
 
 
 
-### content_length_send_ok()
-
- ```sh
-  void content_length_send_ok(int code, int content_length, int client_socket);
-  ```
-
-
-put_send_ok() sends a custom `HTTP 200 OK` and `HTTP 201 Created` with a Content-Length header field whose value is set to `int content_length`.
-This is different from the behavior of sending a `200 OK` with send_code.
-
-
-
-### send_code()
-
- ```sh
-  void send_code(int error_code, int client_socket);
-  ```
-
-
-This function takes in a error code and sends the proper HTTP response to the client socket.
-In this function sending a `200 OK` will have a `Content-Length `of 3 because the message body for this OK response is `OK\n`.
-This function uses sprintf() to format the HTTP response methods properly while changing the actual error message.
-This function supports most of the error codes required for this assignmentL
-* 200 OK
-* 400 Bad Request
-* 403 Forbidden
-* 404 File Not Found
-* 500 Internal Server Error
-* 501 Not Implemented
-
-
 
 ### Extra Design Considerations
 I chose to use large buffer sizes of 2KB to read in large chunks of input from the client quickly, as well as data from files
