@@ -72,8 +72,8 @@ This command starts the server with the specified port number.
  $ ./httpserver -l <log_filename> <port number>
  ```
 * An example port to use the server with is `8080`.
-* The server will error out if the log_filename is forbidden, but create a new file or concatenate the log_filename file otherwise.
-* Use `CTRL + C` to stop the server
+* The server will error out if the `log_filename` is forbidden, but will create a new file or concatenate the file called `log_filename` otherwise.
+* Use `CTRL + C` to stop the server.
 * When stopping with`CTRL + C`, the server might not properly unbind from the ports
   so connecting to a previously used port can result in this error message: `httpserver: bind error: Address already in use`
 * Choose a different port if the server cannot be started with the port you want.
@@ -236,8 +236,8 @@ If it encounters any errors while writing to the file, it sends a `500 Internal 
  ```sh
   void content_length_send_ok(int code, int content_length, int client_socket);
   ```
-put_send_ok() sends a custom `HTTP 200 OK` and `HTTP 201 Created` with a Content-Length header field whose value is set to `int content_length`.
-This is different from the behavior of sending a `200 OK` with send_code.
+content_length_send_ok() sends a custom `HTTP 200 OK` and `HTTP 201 Created` with a `Content-Length` header field whose value is set to `int content_length`.
+This is different from the behavior of sending a `200 OK` with send_code, which sends a `200 OK` response with the content length of 3 because the message body is `OK\n`.
 
 
 
