@@ -67,7 +67,7 @@ httpserver is compiled with clang and C version `C99` using the flags `-Wall -We
 
 ### Running httpserver
 
-This command starts the server using the specified log file with the specified port number.
+This command starts the server using `log_filename` as the log file and `port_number` with the specified port number.
  ```sh
  $ ./httpserver -l <log_filename> <port number>
  ```
@@ -129,6 +129,8 @@ main() closes the logfile afterwards so that log_response() can handle logging o
 validate_uri() checks if the URI argument is valid based on the HTTP specifications.
 * The URI's first character must be a `/`.
 * It should not be more than 19 characters long.
+
+
 The valid characters allowed are:
 * Lowercase `a` through `z`
 * Capital `A` through `Z`
@@ -149,6 +151,7 @@ It returns False if the URI is not valid and True otherwise.
 
 handle_connections() takes the socket descriptor created in main() and recv()s from it to get the HTTP request from the client.
 It does this in a loop, until it reads `\r\n\r\n` and sets a boolean `done` to true to stop looping.
+handle_METHOD refers to the functions handle_GET(), handle_PUT(), and handle_APPEND().
 handle_connection() marks the end of the header section and uses it to put the initial body detected into a buffer for the handle_METHOD functions to use.
 It uses sscanf() to extract the METHOD, URI, VERSION, and Content-Length from the request.
 These values are checked for validity.
@@ -158,7 +161,7 @@ These values are checked for validity.
 handle_connection() uses strcmp() to determine if the METHOD is GET, PUT, or APPEND, and calls the corresponding function handle_get(), handle_put(), and handle_append() accordingly.
 
 
-handle_METHOD refers to handle_GET, handle_PUT, and handle_APPEND.
+
 handle_connection() also passes values to the handle_METHOD functions as well.
 * It passes the socket descriptor, and the URI to all the methods.
 * It passes Content-Length, the initial body contents received, and the initial body length to PUT and APPEND
