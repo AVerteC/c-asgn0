@@ -249,7 +249,13 @@ This is different from the behavior of sending a `200 OK` with send_code, which 
 This function takes in a error code and sends the proper HTTP response to the client socket.
 In this function sending a `200 OK` will have a `Content-Length `of 3 because the message body for this OK response is `OK\n`.
 This function uses sprintf() to format the HTTP response methods properly while changing the actual error message.
-
+This function supports all of the error codes in this assignment. However, because this function doesn't take content-length as an argument, to send the 200 OK and 201 Created responses for PUT and APPEND, I used content_length_send_ok().
+* 200 OK
+* 400 Bad Request
+* 403 Forbidden
+* 404 File Not Found
+* 500 Internal Server Error
+* 501 Not Implemented
 
 
 ### print_content()
