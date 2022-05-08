@@ -86,19 +86,19 @@ This command starts the server with the specified port number.
 
 My implementation of httpserver has 11 parts:
 
-1. [int main(int argc, char *argv[])](#main);
-2. bool validate_uri(char *uri);
-3. void handle_connection(int connfd);
-4. void handle_get(char *resource, int client_socket);
-5. void cat(int filefd, int outputfd, size_t filesize);
-6. void handle_put(char *resource, unsigned char *initial_body_contents, int initial_body_length,
-   int content_length, int client_socket);
-7. void handle_append(char *resource, unsigned char *initial_body_contents, int initial_body_length,
-   int content_length, int client_socket);
-8. void get_send_ok(int content_length, int client_socket);
-9. void send_code(int error_code, int client_socket);
-10. void print_content(unsigned char *request_buffer, int bytes_read, char *title, bool compact);
-11. void log_response(char *method, char *resource, int response_code, int requestID);
+1. [int main(int argc, char *argv[])](#main)
+2. [bool validate_uri(char *uri)](#validate_uri)
+3. [void handle_connection(int connfd)](#handle_connection)
+4. [void handle_get(char *resource, int client_socket)](#handle_get)
+5. [void cat(int filefd, int outputfd, size_t filesize)](#cat)
+6. [void handle_put(char *resource, unsigned char *initial_body_contents, int initial_body_length,
+   int content_length, int client_socket)](#handle_put)
+7. [void handle_append(char *resource, unsigned char *initial_body_contents, int initial_body_length,
+   int content_length, int client_socket)](#handle_append)
+8. [void get_send_ok(int content_length, int client_socket)](#get_send_ok)
+9. [void send_code(int error_code, int client_socket)](#send_code)
+10. [void print_content(unsigned char *request_buffer, int bytes_read, char *title, bool compact)](#print_content)
+11. [void log_response(char *method, char *resource, int response_code, int requestID)](#log_response)
 
 
 
