@@ -86,7 +86,7 @@ This command starts the server with the specified port number.
 
 My implementation of httpserver has 11 parts:
 
-1. [int main(int argc, char *argv[])](#main());
+1. [int main(int argc, char *argv[])](#main);
 2. bool validate_uri(char *uri);
 3. void handle_connection(int connfd);
 4. void handle_get(char *resource, int client_socket);
