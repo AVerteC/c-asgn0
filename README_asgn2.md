@@ -127,10 +127,11 @@ main() closes the logfile afterwards so that log_response() can handle logging o
 validate_uri() checks if the URI argument is valid based on the HTTP specifications.
 * The URI's first character must be a `/`.
 * It should not be more than 19 characters long.
-* The valid characters allowed are :
+The valid characters allowed are:
 * Lowercase `a` through `z`
 * Capital `A` through `Z`
-* The numbers `0` through `9`, `.`, and `_`.
+* The numbers `0` through `9`
+* The symbols `.`, and `_`.
 
 It returns False if the URI is not valid and True otherwise.
 
@@ -139,7 +140,7 @@ It returns False if the URI is not valid and True otherwise.
 ### handle_connection()
 
   ```sh
-  void handle_connection(int connfd);; 
+  void handle_connection(int connfd); 
   ```
 
 handle_connections() takes the socket descriptor created in main() and recv()s from it to get the HTTP request from the client.
@@ -152,6 +153,8 @@ These values are checked for validity.
 
 handle_connection() uses strcmp() to determine if the METHOD is GET, PUT, or APPEND, and calls the corresponding function handle_get(), handle_put(), and handle_append() accordingly.
 
+
+handle_METHOD refers to handle_GET, handle_PUT, and handle_APPEND.
 handle_connection() also passes values to the handle_METHOD functions as well.
 * It passes the socket descriptor, and the URI to all the methods.
 * It passes Content-Length, the initial body contents received, and the initial body length to PUT and APPEND
@@ -171,8 +174,8 @@ If the filename is invalid, it sends a `400 Bad Request` to the client.
 If it has an error opening the file and gets a file descriptor of `-1`, it checks the errno value and:
 * It can send `404 Not Found` when `errno == 2`
 * It can send `403 Forbidden` when `errno == 13`
-  Then, it uses fstat() to get the file size of the resource file and calls get_send_ok() which sends a HTTP 200 response with a content length header with the file's length to the client.
-  It then uses cat() to send the contents of the resource file to the client.
+Then it uses fstat() to get the file size of the resource file and calls get_send_ok() which sends a HTTP 200 response with a `Content-Length` header field with the file's length to the client.
+handle_get() uses cat() to send the contents of the resource file to the client.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -255,6 +258,7 @@ This function takes in a error code and sends the proper HTTP response to the cl
 In this function sending a `200 OK` will have a `Content-Length `of 3 because the message body for this OK response is `OK\n`.
 This function uses sprintf() to format the HTTP response methods properly while changing the actual error message.
 This function supports all of the error codes in this assignment. However, because this function doesn't take content-length as an argument, to send the 200 OK and 201 Created responses for PUT and APPEND, I used content_length_send_ok().
+send_code() supports these HTTP responses.
 * 200 OK
 * 400 Bad Request
 * 403 Forbidden
@@ -270,8 +274,8 @@ This function supports all of the error codes in this assignment. However, becau
   ```
 
 
-This function writes out the request buffer in human-readable format,
-allowing you to be able to read normally unprintable characters like `\r`and `\n` and the space character.
+This function prints out the `request_buffer` in human-readable format to stdout,
+allowing you to be able to see normally unprintable characters like `\r`and `\n` and the space character.
 
 
 
@@ -284,10 +288,9 @@ allowing you to be able to read normally unprintable characters like `\r`and `\n
 
 log_response is called after send_code() and content_length_send_ok() to save the server's responses to the client in the proper format to the log file.
 When the server sends a response, it must be logged with this format to the logfile: `<METHOD>,<URI>,<response_code>,<RequestID header value>\n` .
-I also set requestID to 0 by default so if the Request-Id header field is missing when handle_connection() is done processing the headers, Request-Id will be logged as 0 for requests that are unlabeled with the request id.
+I also set requestID to 0 by default so if the Request-Id header field is missing when handle_connection() is done processing the headers, Request-Id will be logged as 0 for requests that are missing the Request-Id header field.
 In order to protect write atomicity, log_response() uses a mutex lock to prevent threads from writing out of order to the logfile with log_response().
 When writing to the file, log_response() gets the mutex lock, fopens the file in append mode, then uses fprintf(), fflush(), fclose(), and then finishes by unlocking the mutex.
-
 
 
 
