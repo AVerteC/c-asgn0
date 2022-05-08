@@ -38,13 +38,13 @@
 ## About httpserver
 
 httpserver takes a log filename and a port number as command line arguments. The port number is of uint16_t type.
-httpserver runs infinitely and responds to clients' HTTP requests with a blocking wait system. It supports GET, PUT, and APPEND operations. GET sends file contents to the client. PUT saves data the client sends to a file. APPEND appends to existing files in httpserver's directory. httpserver also supports logging responses to requests that have the Request-Id field.
+httpserver runs indefinitely and responds to clients' HTTP requests with a blocking wait system. It supports GET, PUT, and APPEND operations. GET sends file contents to the client. PUT saves data the client sends to a file. APPEND appends data to an existing file in httpserver's directory. httpserver also supports logging responses to requests that have the Request-Id field.
 
 
 
-## How To Use httpserver
+## How to Use httpserver
 
-httpserver's executable needs to be built first, then it can be run with the terminal.
+httpserver's executable needs to be built first, then it can be run using the terminal.
 
 
 
@@ -56,7 +56,7 @@ httpserver is compiled with clang and C version `C99` using the flags `-Wall -We
   ```sh
   $ make
   ```
-* To build split only:
+* To build httpserver only:
   ```sh
   $ make httpserver
   ```
@@ -67,7 +67,7 @@ httpserver is compiled with clang and C version `C99` using the flags `-Wall -We
 
 ### Running httpserver
 
-This command starts the server with the specified port number.
+This command starts the server using the specified log file with the specified port number.
  ```sh
  $ ./httpserver -l <log_filename> <port number>
  ```
@@ -95,7 +95,7 @@ My implementation of httpserver has 11 parts:
    int content_length, int client_socket)](#handle_put)
 7. [void handle_append(char *resource, unsigned char *initial_body_contents, int initial_body_length,
    int content_length, int client_socket)](#handle_append)
-8. [void get_send_ok(int content_length, int client_socket)](#get_send_ok)
+8. [void content_length_send_ok(int content_length, int client_socket)](#content_length_send_ok)
 9. [void send_code(int error_code, int client_socket)](#send_code)
 10. [void print_content(unsigned char *request_buffer, int bytes_read, char *title, bool compact)](#print_content)
 11. [void log_response(char *method, char *resource, int response_code, int requestID)](#log_response)
@@ -116,6 +116,8 @@ main() initializes a mutex for the logfile and stores the logfilename and FILE s
 main() calls fopen() in write mode to create/concatenate the log file. It returns an error if it cannot create the file or access it.
 main() closes the logfile afterwards so that log_response() can handle logging operations.
 
+<p align="right">(<a href="#top">back to top</a>)</p>
+
 
 
 ### validate_uri()
@@ -134,6 +136,8 @@ The valid characters allowed are:
 * The symbols `.`, and `_`.
 
 It returns False if the URI is not valid and True otherwise.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 
 
@@ -158,6 +162,8 @@ handle_METHOD refers to handle_GET, handle_PUT, and handle_APPEND.
 handle_connection() also passes values to the handle_METHOD functions as well.
 * It passes the socket descriptor, and the URI to all the methods.
 * It passes Content-Length, the initial body contents received, and the initial body length to PUT and APPEND
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 
 
@@ -190,6 +196,8 @@ handle_get() uses cat() to send the contents of the resource file to the client.
 This function takes a source file descriptor `filefd` and a destination file descriptor `outputfd`, as well as a file size and sends the contents of `filefd` to `outputfd`.
 It uses read() and recv() to transfer the data from the source to the destination. It doesn't need to open files because the file descriptors are part of this function's arguments.
 
+<p align="right">(<a href="#top">back to top</a>)</p>
+
 
 
 ### handle_put()
@@ -212,6 +220,8 @@ If the resource name is invalid, it sends a `400 Bad Request` to the client.
 To save data from the client, handle_put() uses a loop that counts the bytes written with write() and keeps receiving data from the client until the content length counter matches the bytes written counter.
 
 If it encounters any errors while writing to the file, it sends a `500 Internal Server Error`.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 
 
@@ -237,6 +247,8 @@ To save data from the client, handle_put() uses a loop that counts the bytes wri
 
 If it encounters any errors while writing to the file, it sends a `500 Internal Server Error`.
 
+<p align="right">(<a href="#top">back to top</a>)</p>
+
 
 
 ### content_length_send_ok()
@@ -246,6 +258,8 @@ If it encounters any errors while writing to the file, it sends a `500 Internal 
   ```
 content_length_send_ok() sends a custom `HTTP 200 OK` and `HTTP 201 Created` with a `Content-Length` header field whose value is set to `int content_length`.
 This is different from the behavior of sending a `200 OK` with send_code, which sends a `200 OK` response with the content length of 3 because the message body is `OK\n`.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 
 
@@ -266,6 +280,9 @@ send_code() supports these HTTP responses.
 * 500 Internal Server Error
 * 501 Not Implemented
 
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
 
 ### print_content()
 
@@ -277,7 +294,7 @@ send_code() supports these HTTP responses.
 This function prints out the `request_buffer` in human-readable format to stdout,
 allowing you to be able to see normally unprintable characters like `\r`and `\n` and the space character.
 
-
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 ### log_response()
 
@@ -291,6 +308,8 @@ When the server sends a response, it must be logged with this format to the logf
 I also set requestID to 0 by default so if the Request-Id header field is missing when handle_connection() is done processing the headers, Request-Id will be logged as 0 for requests that are missing the Request-Id header field.
 In order to protect write atomicity, log_response() uses a mutex lock to prevent threads from writing out of order to the logfile with log_response().
 When writing to the file, log_response() gets the mutex lock, fopens the file in append mode, then uses fprintf(), fflush(), fclose(), and then finishes by unlocking the mutex.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 
 
