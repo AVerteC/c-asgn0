@@ -195,16 +195,17 @@ It uses read() and recv() to transfer the data from the source to the destinatio
   ```
 
 This function takes in the resource, the initial body contents that come with the header portion of the HTTP request, the content-length, and the socket descriptor to process a PUT request.
-The PUT method can save data to new files, and files that already exist.
+The PUT method can save data to new and existing files.
 It can write the data received with the header in the initial recv()s by using the initial_body_length, and the initial_body_contents along with a counter to check the bytes written to file.
-It also removes the first slash from the resource name to use with open().
-It also keeps track of whether it needs to send `201 Created` or `200 OK` by using two boolean flags that are set by checking the value errno after calling open().
-If it encounters errors opening the file, it sends `201 Created`, otherwise it sends `200 OK`.
-If it has an error opening the file and gets a file descriptor of `-1`, it checks the errno value and:
-handle_put() calls open in truncate mode to overwrite the resource file's contents.
-It also checks if the resource name is valid.
-It removes the first character of the resource name to use and calls open() in read-only mode.
+
+
+It also keeps track of whether it needs to send `201 Created` or `200 OK` by using two boolean flags that are set by checking the errno value if open() returns a negative file descriptor. If it encounters errors opening the file, it sends `201 Created`, otherwise it sends `200 OK`.
+
+handle_put() checks if the resource name is valid, then calls open() in truncate mode to overwrite the resource file's contents.
+It removes the first character of the resource name `/` to get the actual filename to call open() with.
+
 To save data from the client, handle_put() uses a loop that counts the bytes written with write() and keeps receiving data from the client until the content length counter matches the bytes written counter.
+
 If it encounters any errors while writing to the file, it sends a `500 Internal Server Error`.
 
 
