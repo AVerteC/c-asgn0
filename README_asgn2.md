@@ -86,7 +86,7 @@ This command starts the server with the specified port number.
 
 My implementation of httpserver has 11 parts:
 
-1. int main(int argc, char *argv[]);
+1. [int main(int argc, char *argv[])](#main());
 2. bool validate_uri(char *uri);
 3. void handle_connection(int connfd);
 4. void handle_get(char *resource, int client_socket);
@@ -278,20 +278,19 @@ allowing you to be able to read normally unprintable characters like `\r`and `\n
   ```
 
 
-log_response is called after send_code() and content_length_send_ok() to save calls in the proper format to the log file.
-When the server sends a response, it must be logged with this format to the logfile: `<METHOD>,<URI>,<response_code>,<RequestID header value>\n`
+log_response is called after send_code() and content_length_send_ok() to save the server's responses to the client in the proper format to the log file.
+When the server sends a response, it must be logged with this format to the logfile: `<METHOD>,<URI>,<response_code>,<RequestID header value>\n` .
 I also set requestID to 0 by default so if the Request-Id header field is missing when handle_connection() is done processing the headers, Request-Id will be logged as 0 for requests that are unlabeled with the request id.
-In order to protect write atomicity, log_response() a mutex lock to prevent threads from writing out of order to the logfile with log_response().
-To write to the file, log_response() opens the file in write mode, then uses fprintf(), then fflush(), and finally fclose(), then it unlocks the mutex.
+In order to protect write atomicity, log_response() uses a mutex lock to prevent threads from writing out of order to the logfile with log_response().
+When writing to the file, log_response() fopen()s the file in append mode, uses fprintf(), fflush(), fclose(), and then it unlocks the mutex.
 
 
 
 
 ### Extra Design Considerations
-I chose to use large buffer sizes of 2KB to read in large chunks of input from the client quickly, as well as data from files
-instead of calling read() on every individual character.
+I used large buffer sizes of 2KB to read in large chunks of input and file data quickly, instead of calling read() on every byte.
 Since main() handles closing the socket, none of my functions need to close the socket.
-I also pass state to my functions through the arguments with content length, and especially the initial buffer contents and initial buffer length.
+I also pass necessary information to my functions through their arguments. The handle_METHOD functions with content length, and especially the initial buffer contents and initial buffer length.
 handle_METHODS also close file descriptors when they are done using them before sending their HTTP response back to the client.
 
 For audit logging, I used mutexes to protect the logfile from unordered writes.
