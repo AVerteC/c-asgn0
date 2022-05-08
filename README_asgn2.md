@@ -240,7 +240,7 @@ If it encounters any errors while writing to the file, it sends a `500 Internal 
 ### handle_append()
 
   ```sh
-  void handle_put(char *resource, unsigned char *initial_body_contents, int initial_body_length, int content_length, int client_socket);
+  void handle_append(char *resource, unsigned char *initial_body_contents, int initial_body_length, int content_length, int client_socket);
   ```
 
 This function takes in the resource, the initial body contents that come with the header portion of the HTTP request, the content-length, and the socket descriptor to process a APPEND request.
@@ -255,7 +255,7 @@ handle_append() also checks if the filename is valid with validate_uri(). If the
 If the filename is invalid, it sends a `400 Bad Request` to the client.
 It can write the data received with the header in the initial recv()s by using the initial_body_length, and the initial_body_contents along with a counter to check the bytes written to file.
 
-To save data from the client, handle_put() uses a loop that counts the bytes written with write() and keeps receiving data from the client until the content length counter matches the bytes written counter.
+To save data from the client, handle_append() uses a loop that counts the bytes written with write() and keeps receiving data from the client until the content length counter matches the bytes written counter.
 
 If it encounters any errors while writing to the file, it sends a `500 Internal Server Error`.
 
@@ -302,9 +302,10 @@ send_code() supports these HTTP responses.
   void print_content(unsigned char *request_buffer, int bytes_read, char *title, bool compact);
   ```
 
-
 This function prints out the `request_buffer` in human-readable format to stdout,
 allowing you to be able to see normally unprintable characters like `\r`and `\n` and the space character.
+It also has a compact parameter to allow printing one character of the request buffer per line or as a paragraph.
+In addition you can print a custom title to start the output with.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -326,7 +327,7 @@ When writing to the file, log_response() gets the mutex lock, fopens the file in
 
 
 ### Extra Design Considerations
-I used large buffer sizes of 2KB to read in large chunks of input and file data quickly, instead of calling read() on every byte.
+I use a large buffer size of 2KB to read in large chunks of input and file data quickly, instead of calling read() on every byte.
 Since main() handles closing the socket, none of my functions need to close the socket.
 In order to avoid dynamically allocating memory for buffers in my functions, all of my functions take in buffers by reference.
 To prevent the program from running out of file descriptors, my functions close the resource file descriptors when they are done using them before sending a response back to the client.
