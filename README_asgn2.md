@@ -30,7 +30,7 @@
         <li><a href="#log_response">log_response()</a></li>
       </ul>
     </li>
-    <li><a href="#Design-considerations">Extra Design Considerations</a></li>
+    <li><a href="#Extra-design-considerations">Extra Design Considerations</a></li>
   </ol>
 </details>
 
