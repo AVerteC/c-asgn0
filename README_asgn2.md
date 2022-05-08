@@ -110,7 +110,7 @@ My implementation of httpserver has 11 parts:
 
 main() uses the sample code to create a listen socket to detect and process client inputs. main() also handles the command-line arguments for the port number.
 It calls handle_connection() on each connection created to process the HTTP input from clients,
-and closes the socket when the request has been processed by handle_connection(). 
+and closes the socket after handle_connection() processes the request. 
 main() has a signal handler to close the program gracefully when it gets a SIGTERM signal.
 main() initializes a mutex for the logfile and stores the logfilename and FILE stream as global variables.
 main() calls fopen() in write mode to create/concatenate the log file. It returns an error if it cannot create the file or access it.
@@ -167,6 +167,7 @@ handle_connection() also passes values to the handle_METHOD functions as well.
 This function takes in the resource and the socket descriptor to process a GET request.
 It also removes the first slash from the resource name to use with open().
 It also checks if the resource name is valid with validate_uri(). It removes the first character of the resource name to use and calls open() in read-only mode.
+If the filename is invalid, it sends a `400 Bad Request` to the client.
 If it has an error opening the file and gets a file descriptor of `-1`, it checks the errno value and:
 * It can send `404 Not Found` when `errno == 2`
 * It can send `403 Forbidden` when `errno == 13`
@@ -183,7 +184,7 @@ If it has an error opening the file and gets a file descriptor of `-1`, it check
   void cat(int filefd, int outputfd, size_t filesize);
   ```
 
-This function takes a source file descriptor `filefd` and a destination file descriptor `outputfd`, as well as a file size and sends the contents of `filefd` to `outputfd`
+This function takes a source file descriptor `filefd` and a destination file descriptor `outputfd`, as well as a file size and sends the contents of `filefd` to `outputfd`.
 It uses read() and recv() to transfer the data from the source to the destination. It doesn't need to open files because the file descriptors are part of this function's arguments.
 
 
@@ -195,7 +196,7 @@ It uses read() and recv() to transfer the data from the source to the destinatio
   ```
 
 This function takes in the resource, the initial body contents that come with the header portion of the HTTP request, the content-length, and the socket descriptor to process a PUT request.
-The PUT method can save data to new and existing files.
+The PUT method can save data to a new or existing file.
 It can write the data received with the header in the initial recv()s by using the initial_body_length, and the initial_body_contents along with a counter to check the bytes written to file.
 
 
@@ -203,6 +204,7 @@ It also keeps track of whether it needs to send `201 Created` or `200 OK` by usi
 
 handle_put() checks if the resource name is valid, then calls open() in truncate mode to overwrite the resource file's contents.
 It removes the first character of the resource name `/` to get the actual filename to call open() with.
+If the resource name is invalid, it sends a `400 Bad Request` to the client.
 
 To save data from the client, handle_put() uses a loop that counts the bytes written with write() and keeps receiving data from the client until the content length counter matches the bytes written counter.
 
@@ -216,18 +218,20 @@ If it encounters any errors while writing to the file, it sends a `500 Internal 
   void handle_put(char *resource, unsigned char *initial_body_contents, int initial_body_length, int content_length, int client_socket);
   ```
 
-This function takes in the resource, the initial body contents that come with the header portion of the HTTP request, the content-length, and the socket descriptor to process a GET request.
-The APPEND method cannot append to files that do not already exist.
-handle_append() checks for this by checking the value errno after calling open().
-If it detects permission errors or file not found errors returns a `404 Not Found`
-If it encounters errors opening the file, it sends `201 Created`, otherwise it sends `200 OK`.
+This function takes in the resource, the initial body contents that come with the header portion of the HTTP request, the content-length, and the socket descriptor to process a APPEND request.
+The APPEND method can only append to existing files that the server has write permissions for.
+
+handle_append() checks for this by checking the errno value if open() returns a negative file descriptor.
 If it has an error opening the file and gets a file descriptor of `-1`, it checks the errno value and:
-handle_put() calls open in truncate mode to overwrite the resource file's contents.
-It also removes the first slash from the resource name to use with open().
+* It can send `404 Not Found` when `errno == 2`
+* It can send `403 Forbidden` when `errno == 13`
+
+handle_append() also checks if the filename is valid with validate_uri(). If the filename is valid, it removes the first character of resource, `/` and calls open() on the file in append mode.
+If the filename is invalid, it sends a `400 Bad Request` to the client.
 It can write the data received with the header in the initial recv()s by using the initial_body_length, and the initial_body_contents along with a counter to check the bytes written to file.
-It also checks if the resource name is valid.
-It removes the first character of the resource name to use and calls open() in read-only mode.
+
 To save data from the client, handle_put() uses a loop that counts the bytes written with write() and keeps receiving data from the client until the content length counter matches the bytes written counter.
+
 If it encounters any errors while writing to the file, it sends a `500 Internal Server Error`.
 
 
