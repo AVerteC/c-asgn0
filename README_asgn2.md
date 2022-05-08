@@ -282,7 +282,7 @@ log_response is called after send_code() and content_length_send_ok() to save th
 When the server sends a response, it must be logged with this format to the logfile: `<METHOD>,<URI>,<response_code>,<RequestID header value>\n` .
 I also set requestID to 0 by default so if the Request-Id header field is missing when handle_connection() is done processing the headers, Request-Id will be logged as 0 for requests that are unlabeled with the request id.
 In order to protect write atomicity, log_response() uses a mutex lock to prevent threads from writing out of order to the logfile with log_response().
-When writing to the file, log_response() fopen()s the file in append mode, uses fprintf(), fflush(), fclose(), and then it unlocks the mutex.
+When writing to the file, log_response() gets the mutex lock, fopens the file in append mode, then uses fprintf(), fflush(), fclose(), and then finishes by unlocking the mutex.
 
 
 
@@ -290,9 +290,8 @@ When writing to the file, log_response() fopen()s the file in append mode, uses 
 ### Extra Design Considerations
 I used large buffer sizes of 2KB to read in large chunks of input and file data quickly, instead of calling read() on every byte.
 Since main() handles closing the socket, none of my functions need to close the socket.
-I also pass necessary information to my functions through their arguments. The handle_METHOD functions with content length, and especially the initial buffer contents and initial buffer length.
-handle_METHODS also close file descriptors when they are done using them before sending their HTTP response back to the client.
-
-For audit logging, I used mutexes to protect the logfile from unordered writes.
+In order to avoid dynamically allocating memory for buffers in my functions, all of my functions take in buffers by reference.
+To prevent the program from running out of file descriptors, my functions close the resource file descriptors when they are done using them before sending a response back to the client.
+For audit logging, I used a mutex lock to give the logfile coherency.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
