@@ -37,8 +37,8 @@
 
 ## About httpserver
 
-httpserver takes a log filename and a port number for its input. The port number is of uint16_t type.
-httpserver runs infinitely and responds to clients' HTTP messages with a blocking wait system. It supports GET, PUT, and APPEND operations. GET sends file contents to the client. PUT saves data the client sends to a file. APPEND appends to existing files in httpserver's directory.
+httpserver takes a log filename and a port number as command line arguments. The port number is of uint16_t type.
+httpserver runs infinitely and responds to clients' HTTP requests with a blocking wait system. It supports GET, PUT, and APPEND operations. GET sends file contents to the client. PUT saves data the client sends to a file. APPEND appends to existing files in httpserver's directory. httpserver also supports logging responses to requests that have the Request-Id field.
 
 
 
