@@ -151,8 +151,14 @@ It returns False if the URI is not valid and True otherwise.
 
 handle_connections() takes the socket descriptor created in main() and recv()s from it to get the HTTP request from the client.
 It does this in a loop, until it reads `\r\n\r\n` and sets a boolean `done` to true to stop looping.
-handle_METHOD refers to the functions handle_GET(), handle_PUT(), and handle_APPEND().
+
+
 handle_connection() marks the end of the header section and uses it to put the initial body detected into a buffer for the handle_METHOD functions to use.
+handle_METHOD refers to the functions: 
+* handle_GET()
+* handle_PUT()
+* handle_APPEND()
+
 It uses sscanf() to extract the METHOD, URI, VERSION, and Content-Length from the request.
 These values are checked for validity.
 * handle_connection() sends `400 Bad Request` when the METHOD is longer than 8 characters, or the VERSION is not `HTTP/1.1`.
@@ -164,7 +170,7 @@ handle_connection() uses strcmp() to determine if the METHOD is GET, PUT, or APP
 
 handle_connection() also passes values to the handle_METHOD functions as well.
 * It passes the socket descriptor, and the URI to all the methods.
-* It passes Content-Length, the initial body contents received, and the initial body length to PUT and APPEND
+* It passes Content-Length, the initial body contents received, and the initial body length for PUT and APPEND
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -176,15 +182,18 @@ handle_connection() also passes values to the handle_METHOD functions as well.
   void handle_get(char *resource, int client_socket);
   ```
 
-This function takes in the resource and the socket descriptor to process a GET request.
-It also removes the first slash from the resource name to use with open().
-It also checks if the resource name is valid with validate_uri(). It removes the first character of the resource name to use and calls open() in read-only mode.
+This function takes in the resource (URI) and the socket descriptor to process a GET request.
+It also checks if the resource name is valid with validate_uri(), and removes the first character of the resource name to use and calls open() in read-only mode.
 If the filename is invalid, it sends a `400 Bad Request` to the client.
-If it has an error opening the file and gets a file descriptor of `-1`, it checks the errno value and:
+
+
+If it has an error opening the file and gets a file descriptor of `-1`, it checks the errno value.
 * It can send `404 Not Found` when `errno == 2`
 * It can send `403 Forbidden` when `errno == 13`
+
+
 Then it uses fstat() to get the file size of the resource file and calls get_send_ok() which sends a HTTP 200 response with a `Content-Length` header field with the file's length to the client.
-handle_get() uses cat() to send the contents of the resource file to the client.
+handle_get() uses cat() to send the contents of the resource file from the server to the client.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -211,10 +220,10 @@ It uses read() and recv() to transfer the data from the source to the destinatio
 
 This function takes in the resource, the initial body contents that come with the header portion of the HTTP request, the content-length, and the socket descriptor to process a PUT request.
 The PUT method can save data to a new or existing file.
-It can write the data received with the header in the initial recv()s by using the initial_body_length, and the initial_body_contents along with a counter to check the bytes written to file.
+It can write the data received with the header in the initial recv()s by using the initial_body_length, and the initial_body_contents along with a counter to check the bytes written to the file.
 
 
-It also keeps track of whether it needs to send `201 Created` or `200 OK` by using two boolean flags that are set by checking the errno value if open() returns a negative file descriptor. If it encounters errors opening the file, it sends `201 Created`, otherwise it sends `200 OK`.
+handle_put() also keeps track of whether it needs to send `201 Created` or `200 OK` by using two boolean flags that are set by checking the errno value if open() returns a negative file descriptor. If it encounters errors opening the file, it sends `201 Created`, otherwise it sends `200 OK`.
 
 handle_put() checks if the resource name is valid, then calls open() in truncate mode to overwrite the resource file's contents.
 It removes the first character of the resource name `/` to get the actual filename to call open() with.
