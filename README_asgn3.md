@@ -28,9 +28,9 @@
         <li><a href="#send_code">send_code()</a></li>
         <li><a href="#print_content">print_content()</a></li>
         <li><a href="#log_response">log_response()</a></li>
-        <li><a href="#Linked_List_Work_Queue">Linked List Work Queue</a></li>
-        <li><a href="#Dispatcher_Threads">Dispatcher Thread</a></li>
-        <li><a href="#Worker_Threads">Worker Threads</a></li>
+        <li><a href="#Linked_List_Work_Queue">Linked_List_Work_Queue</a></li>
+        <li><a href="#Dispatcher_Threads">Dispatcher_Thread</a></li>
+        <li><a href="#Worker-Threads">Worker_Threads</a></li>
       </ul>
     </li>
     <li><a href="#Extra-design-considerations">Extra Design Considerations</a></li>
@@ -125,7 +125,7 @@ main() closes the logfile afterwards so that log_response() can handle logging o
 Dispatcher Thread behavior is in the main() function but it is explained here:
 
 
-[Dispatcher Threads](#Dispatcher_Threads)
+[Dispatcher_Threads](#Dispatcher_Threads)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -335,7 +335,7 @@ When writing to the file, log_response() gets the mutex lock, then uses fprintf(
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-### Linked List Work Queue
+### Linked_List_Work_Queue
 
 
 In order to implement a work queue, I use a queue that is based on a doubly linked list. 
@@ -370,7 +370,7 @@ I added four functions to implement the functionality of the linked list and que
   
   <p align="right">(<a href="#top">back to top</a>)</p>
 
-### Dispatcher Thread
+### Dispatcher_Thread
 
 
   The dispatcher behavior is part of main() and runs indefinitely. It accepts incoming connections and creates socket descriptors for them, adding a node containing the socket descriptor to the work queue. Then it signals the work queue conditional variable to let worker threads know that they can consume nodes from the work queue. This is to signal the worker threads to continue consuming nodes if the work queue was previously empty. 
