@@ -88,7 +88,7 @@ This command starts the server with `thread_count` amount of worker threads usin
 
 ## Design Overview
 
-My implementation of httpserver has 13 parts:
+My implementation of httpserver has 14 parts:
 
 1. [int main(int argc, char *argv[])](#main)
 2. [bool validate_uri(char *uri)](#validate_uri)
