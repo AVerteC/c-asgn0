@@ -337,6 +337,7 @@ When writing to the file, log_response() gets the mutex lock, then uses fprintf(
 
 ### Linked List Work Queue
 
+
 In order to implement a work queue, I use a queue that is based on a doubly linked list. 
 The node of the linked list queue contains the file descriptor of the incoming socket connection, and a previous and next pointer that keep track of where the node is in the linked list. This data structure doesn't have a maximum amount of nodes.
 I added four functions to implement the functionality of the linked list and queue system.
@@ -371,12 +372,14 @@ I added four functions to implement the functionality of the linked list and que
 
 ### Dispatcher Thread
 
+
   The dispatcher behavior is part of main() and runs indefinitely. It accepts incoming connections and creates socket descriptors for them, adding a node containing the socket descriptor to the work queue. Then it signals the work queue conditional variable to let worker threads know that they can consume nodes from the work queue. This is to signal the worker threads to continue consuming nodes if the work queue was previously empty. 
 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ### Worker Threads
+  
   
   Each worker thread is running the worker function indefinitely.
   This function gets the work queue mutex lock, then takes the head node off the work queue with removeNode(). Afterwards, it unlocks the work queue mutex lock. If the node is null it will print an error to stdout if the DEBUG flag is set to 1. When the node is valid, it runs handle_connection() using the node's socket descriptor value. Then it closes the socket descriptor after it is done processing the HTTP request from the client, and frees the node.
