@@ -28,8 +28,8 @@
         <li><a href="#send_code">send_code()</a></li>
         <li><a href="#print_content">print_content()</a></li>
         <li><a href="#log_response">log_response()</a></li>
-        <li><a href="#Linked_List_Work_Queue">Linked_List_Work_Queue</a></li>
-        <li><a href="#Dispatcher_Threads">Dispatcher_Thread</a></li>
+        <li><a href="#Linked-List-Work-Queue">Linked_List_Work_Queue</a></li>
+        <li><a href="#Dispatcher-Threads">Dispatcher_Thread</a></li>
         <li><a href="#Worker-Threads">Worker_Threads</a></li>
       </ul>
     </li>
@@ -103,9 +103,9 @@ My implementation of httpserver has 13 parts:
 9. [void send_code(int error_code, int client_socket)](#send_code)
 10. [void print_content(unsigned char *request_buffer, int bytes_read, char *title, bool compact)](#print_content)
 11. [void log_response(char *method, char *resource, int response_code, int requestID)](#log_response)
-12. [Linked List Work Queue](#Linked_List_Work_Queue)
-13. [Dispatcher Thread](#Dispatcher_Threads)
-14. [Worker Threads](#Worker_Threads)
+12. [Linked_List_Work_Queue](#Linked_List_Work_Queue)
+13. [Dispatcher_Thread](#Dispatcher_Threads)
+14. [Worker_Threads](#Worker_Threads)
 
 
 ### main()
@@ -125,7 +125,7 @@ main() closes the logfile afterwards so that log_response() can handle logging o
 Dispatcher Thread behavior is in the main() function but it is explained here:
 
 
-[Dispatcher_Threads](#Dispatcher_Threads)
+[Dispatcher_Thread](#Dispatcher_Thread)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -378,7 +378,7 @@ I added four functions to implement the functionality of the linked list and que
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-### Worker Threads
+### Worker_Threads
   
   
   Each worker thread is running the worker function indefinitely.
