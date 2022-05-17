@@ -28,6 +28,9 @@
         <li><a href="#send_code">send_code()</a></li>
         <li><a href="#print_content">print_content()</a></li>
         <li><a href="#log_response">log_response()</a></li>
+        <li><a href="#Linked List Work Queue">Linked List Work Queue</a></li>
+        <li><a href="#Dispatcher Thread">Dispatcher Thread</a></li>
+        <li><a href="#Worker Threads">Worker Threads</a></li>
       </ul>
     </li>
     <li><a href="#Extra-design-considerations">Extra Design Considerations</a></li>
@@ -67,10 +70,11 @@ httpserver is compiled with clang and C version `C99` using the flags `-Wall -We
 
 ### Running httpserver
 
-This command starts the server using `log_filename` as the log file and `port_number` with the specified port number.
+This command starts the server with `thread_count` amount of worker threads using `log_filename` as the log file and `port_number` with the specified port number.
  ```sh
- $ ./httpserver -l <log_filename> <port number>
+ $ ./httpserver -t <thread_count> -l <log_filename> <port number>
  ```
+* Running httpserver without specifying the `thread_count` with `-t` will use a default amount of 4 worker threads.
 * An example port to use the server with is `8080`.
 * The server will error out if the `log_filename` is forbidden, but will create a new file or concatenate the file called `log_filename` otherwise.
 * Use `CTRL + C` to stop the server.
@@ -84,7 +88,7 @@ This command starts the server using `log_filename` as the log file and `port_nu
 
 ## Design Overview
 
-My implementation of httpserver has 11 parts:
+My implementation of httpserver has 13 parts:
 
 1. [int main(int argc, char *argv[])](#main)
 2. [bool validate_uri(char *uri)](#validate_uri)
@@ -99,7 +103,9 @@ My implementation of httpserver has 11 parts:
 9. [void send_code(int error_code, int client_socket)](#send_code)
 10. [void print_content(unsigned char *request_buffer, int bytes_read, char *title, bool compact)](#print_content)
 11. [void log_response(char *method, char *resource, int response_code, int requestID)](#log_response)
-
+12. [Linked List Work Queue](#Linked List Work Queue)
+13. [Dispatcher Thread](#Dispatcher Thread)
+14. [Worker Threads](#Worker Threads)
 
 
 ### main()
@@ -320,10 +326,59 @@ log_response is called after send_code() and content_length_send_ok() to save th
 When the server sends a response, it must be logged with this format to the logfile: `<METHOD>,<URI>,<response_code>,<RequestID header value>\n` .
 I also set requestID to 0 by default so if the Request-Id header field is missing when handle_connection() is done processing the headers, Request-Id will be logged as 0 for requests that are missing the Request-Id header field.
 In order to protect write atomicity, log_response() uses a mutex lock to prevent threads from writing out of order to the logfile with log_response().
-When writing to the file, log_response() gets the mutex lock, fopens the file in append mode, then uses fprintf(), fflush(), fclose(), and then finishes by unlocking the mutex.
+When writing to the file, log_response() gets the mutex lock, then uses fprintf(), fflush(), fclose(), and then finishes by unlocking the mutex.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
+### Linked List Work Queue
+
+In order to implement a work queue, I use a queue that is based on a doubly linked list. 
+The node of the linked list queue contains the file descriptor of the incoming socket connection, and a previous and next pointer that keep track of where the node is in the linked list. This data structure doesn't have a maximum amount of nodes.
+I added four functions to implement the functionality of the linked list and queue system.
+
+
+1. `void addNode(Queue *queue, int connfd)`
+  
+  
+  This function adds a node with the specified socket descriptor to the queue in the function arguments.
+  If the queue is null it returns an error. Otherwise it allocates the memory required for a new node, assigning its socket descriptor value and adds it to the beginning of the list. 
+
+
+2. `Node *removeNode(Queue *queue)`
+
+
+  This function removes a node from the head of the queue, returning the pointer to the node itself. If the queue is null it returns an error. The caller function needs to free() the node after it is done using it to prevent memory leaks.
+
+4. `void printNode(Node *node)`
+
+
+  This function will run only if the DEBUG flag is set to 1.
+  This function is a debugging function that prints out the socket descriptor value belonging to the queue node in the function arguments.
+  
+6. `void printQueue(Queue *queue)`
+
+
+  This function will run only if the DEBUG flag is set to 1.
+  This function is a debugging function that prints out all of the socket descriptor values of the nodes in the queue from head to tail. 
+  If the queue is null it returns an error.
+  
+  <p align="right">(<a href="#top">back to top</a>)</p>
+
+### Dispatcher Thread
+
+  The dispatcher behavior is part of main() and runs indefinitely. It accepts incoming connections and creates socket descriptors for them, adding a node containing the socket descriptor to the work queue. Then it signals the work queue conditional variable to let worker threads know that they can consume nodes from the work queue. This is to signal the worker threads to continue consuming nodes if the work queue was previously empty. 
+
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+### Worker Threads
+  
+  Each worker thread is running the worker function indefinitely.
+  This function gets the work queue mutex lock, then takes the head node off the work queue with removeNode(). Afterwards, it unlocks the work queue mutex lock. If the node is null it will print an error to stdout if the DEBUG flag is set to 1. When the node is valid, it runs handle_connection() using the node's socket descriptor value. Then it closes the socket descriptor after it is done processing the HTTP request from the client, and frees the node.
+  If the work queue has contains at least one node, it will remove nodes from the work queue by using the work queue mutex lock. If the queue is empty, the worker function will get the work queue mutex lock, then wait on the work queue conditional variable signal that something has been added to the work queue in order to prevent busy-waiting.
+  
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 
 ### Extra Design Considerations
