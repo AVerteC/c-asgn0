@@ -28,9 +28,9 @@
         <li><a href="#send_code">send_code()</a></li>
         <li><a href="#print_content">print_content()</a></li>
         <li><a href="#log_response">log_response()</a></li>
-        <li><a href="#Linked List Work Queue">Linked List Work Queue</a></li>
-        <li><a href="#Dispatcher Thread">Dispatcher Thread</a></li>
-        <li><a href="#Worker Threads">Worker Threads</a></li>
+        <li><a href="#Linked">Linked List Work Queue</a></li>
+        <li><a href="#Dispatcher">Dispatcher Thread</a></li>
+        <li><a href="#Worker">Worker Threads</a></li>
       </ul>
     </li>
     <li><a href="#Extra-design-considerations">Extra Design Considerations</a></li>
@@ -103,9 +103,9 @@ My implementation of httpserver has 13 parts:
 9. [void send_code(int error_code, int client_socket)](#send_code)
 10. [void print_content(unsigned char *request_buffer, int bytes_read, char *title, bool compact)](#print_content)
 11. [void log_response(char *method, char *resource, int response_code, int requestID)](#log_response)
-12. [Linked List Work Queue](#Linked List Work Queue)
-13. [Dispatcher Thread](#Dispatcher Thread)
-14. [Worker Threads](#Worker Threads)
+12. [Linked List Work Queue](#Linked)
+13. [Dispatcher Thread](#Dispatcher)
+14. [Worker Threads](#Worker)
 
 
 ### main()
@@ -121,6 +121,11 @@ main() has a signal handler to close the program gracefully when it gets a SIGTE
 main() initializes a mutex for the logfile and stores the logfilename and FILE stream as global variables.
 main() calls fopen() in write mode to create/concatenate the log file. It returns an error if it cannot create the file or access it.
 main() closes the logfile afterwards so that log_response() can handle logging operations.
+
+Dispatcher Thread behavior is explained here:
+
+
+[Dispatcher Thread](#Dispatcher)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
