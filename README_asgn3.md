@@ -28,9 +28,9 @@
         <li><a href="#send_code">send_code()</a></li>
         <li><a href="#print_content">print_content()</a></li>
         <li><a href="#log_response">log_response()</a></li>
-        <li><a href="#Linked-List-Work-Queue">Linked_List_Work_Queue</a></li>
-        <li><a href="#Dispatcher-Threads">Dispatcher_Thread</a></li>
-        <li><a href="#Worker-Threads">Worker_Threads</a></li>
+        <li><a href="#Linked_List_Work_Queue">Linked_List_Work_Queue</a></li>
+        <li><a href="#Dispatcher_Threads">Dispatcher_Thread</a></li>
+        <li><a href="#Worker_Threads">Worker_Threads</a></li>
       </ul>
     </li>
     <li><a href="#Extra-design-considerations">Extra Design Considerations</a></li>
