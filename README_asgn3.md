@@ -349,13 +349,28 @@ I added four functions to implement the functionality of the linked list and que
   
   
   This function adds a node with the specified socket descriptor to the queue in the function arguments.
-  If the queue is null it returns an error. Otherwise it allocates the memory required for a new node, assigning its socket descriptor value and adds it to the beginning of the list. 
+  If the queue is null it returns an error. Otherwise it allocates the memory required for a new node, assigning its socket descriptor value and adds it to the end of the list. 
+  
+  
+  
+1. `void addNodeObject(Queue *queue, Node *target)`
+  
+  
+  This function adds a node object to the queue in the function arguments.
+  If the queue is null it returns an error. Otherwise it adds the node object to t, assigning its socket descriptor value and adds it to the end of the list. 
 
 
 2. `Node *removeNode(Queue *queue)`
 
 
   This function removes a node from the head of the queue, returning the pointer to the node itself. If the queue is null it returns an error. The caller function needs to free() the node after it is done using it to prevent memory leaks.
+  
+
+3. `Node *removeNodeAnywhere(Queue *queue, Node *target)`
+
+
+  This function removes a node from the anywhere in the queue, disconnecting the forward and backward links of the node, then reassembling the connection of the nodes surrounding the removed node, returning the pointer to the node itself. If the queue is null it returns an error. The caller function needs to free() the node after it is done using it to prevent memory leaks.  
+
 
 4. `void printNode(Node *node)`
 
