@@ -30,6 +30,7 @@
         <li><a href="#log_response">log_response()</a></li>
         <li><a href="#Linked_List_Work_Queue">Linked_List_Work_Queue</a></li>
         <li><a href="#Dispatcher_Threads">Dispatcher_Thread</a></li>
+        <li><a href="#Nonblocking_I/0">Nonblocking_I/0</a></li>
         <li><a href="#Worker_Threads">Worker_Threads</a></li>
       </ul>
     </li>
@@ -106,6 +107,7 @@ My implementation of httpserver has 14 parts:
 12. [Linked_List_Work_Queue](#Linked_List_Work_Queue)
 13. [Dispatcher_Thread](#Dispatcher_Threads)
 14. [Worker_Threads](#Worker_Threads)
+15. [Non-Blocking_I/0](#Non-Blocking_I/0)
 
 
 ### main()
@@ -387,6 +389,12 @@ I added four functions to implement the functionality of the linked list and que
   
 
 <p align="right">(<a href="#top">back to top</a>)</p>
+
+
+### Non-Blocking_I/0
+
+Poll queue
+Thread 0 polls for all of the file descriptors in the poll queue using poll
 
 
 ### Extra Design Considerations
