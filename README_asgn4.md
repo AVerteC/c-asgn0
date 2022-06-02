@@ -29,6 +29,7 @@
         <li><a href="#print_content">print_content()</a></li>
         <li><a href="#log_response">log_response()</a></li>
         <li><a href="#Linked_List_Work_Queue">Linked_List_Work_Queue</a></li>
+        <li><a href="#Work_Queue_Superstructure">Work_Queue_Superstructure</a></li>
         <li><a href="#Dispatcher_Threads">Dispatcher_Thread</a></li>
         <li><a href="#Nonblocking_I/0">Nonblocking_I/0</a></li>
         <li><a href="#Worker_Threads">Worker_Threads</a></li>
@@ -77,7 +78,8 @@ This command starts the server with `thread_count` amount of worker threads usin
  ```
 * Running httpserver without specifying the `thread_count` with `-t` will use a default amount of 4 worker threads.
 * An example port to use the server with is `8080`.
-* The server will error out if the `log_filename` is forbidden, but will create a new file or concatenate the file called `log_filename` otherwise.
+* The server will error out if the `log_filename` is forbidden. 
+* It will create a new file or concatenate the file called `log_filename` if the file with the specified name does not exist yet.
 * Use `CTRL + C` to stop the server.
 * When stopping with`CTRL + C`, the server might not properly unbind from the ports
   so connecting to a previously used port can result in this error message: `httpserver: bind error: Address already in use`
@@ -105,9 +107,10 @@ My implementation of httpserver has 14 parts:
 10. [void print_content(unsigned char *request_buffer, int bytes_read, char *title, bool compact)](#print_content)
 11. [void log_response(char *method, char *resource, int response_code, int requestID)](#log_response)
 12. [Linked_List_Work_Queue](#Linked_List_Work_Queue)
-13. [Dispatcher_Thread](#Dispatcher_Threads)
-14. [Worker_Threads](#Worker_Threads)
-15. [Non-Blocking_I/0](#Non-Blocking_I/0)
+13. [Work_Queue_Superstructure](#Work_Queue_Superstructure)
+14. [Dispatcher_Thread](#Dispatcher_Threads)
+15. [Worker_Threads](#Worker_Threads)
+16. [Non-Blocking_I/0](#Non-Blocking_I/0)
 
 
 ### main()
@@ -387,7 +390,7 @@ I added four functions to implement the functionality of the linked list and que
   
   <p align="right">(<a href="#top">back to top</a>)</p>
 
-### Work Queue Superstructure
+### Work_Queue_Superstructure
   
   
   In order to add atomicity and concurrency to requests for resources hosted on the server, I redesigned the work queue structure from asgn3. This new structure consists of a queue of queues (Work Queue Superstructure). The top level of queues have a resource attribute, and requests that contain a resource are added to the tail of the resource queue. If there are no resource queues for a resource, a new resource queue will be created. This is similar to a 2D linked list array. If a resource queue has zero nodes, it will be removed.
@@ -396,11 +399,29 @@ I added four functions to implement the functionality of the linked list and que
   **Worker specific behavior**
   
   
-  When worker threads get a request from the Work Queue Superstructure, they get the queue mutex lock first. Then they take a request node from the head of any of the resource queues that do not have the processing flag as true on the resource queue. Worker threads cannot get requests from resource queues that have the processing flag as true. When the request that the worker gets is stuck and needs polling, the worker will poll the request. If the request has content to read, then the worker thread continues the request with continue_request or continue_connection when needed. Otherwise, the worker thread will get the queue mutex lock and add the request to the head of the corresponding resource queue, then unlock the queue mutex lock.  
+  When worker threads get a request from the Work Queue Superstructure, they get the queue mutex lock first. Then they take a request node from the head of any of the resource queues that do not have the processing flag as true on the resource queue. Worker threads cannot get requests from resource queues that have the processing flag as true. When the request that the worker gets is stuck and needs polling, the worker will poll the request. If the request has content to read, then the worker thread continues the request with continue_request or continue_connection when needed. Otherwise, the worker thread will get the queue mutex lock and add the request to the head of the corresponding resource queue, then unlock the queue mutex lock, and set the resource queue's processing flag to false.
   
+  **Additional functions**
+  
+  
+  `continue_connection(request_node)`
+    This function is similar to handle_connection, but it has the added functionality of being able to respond to partial requests and continue them if the complete header hasn't been sent yet. Handle_connection is no longer called.
+   
+  
+  `continue_request(request_node)`
+    This function combines the functionality of handle_put() and handle_append() into one function. It reads attributes from request_node and does file existence checks to determine whether to send 200 OK or 201 Created to the client. It also supports resuming from a partial PUT or APPEND request where the request body has not been completely sent yet.
+    
+  
+  **Memory safety and Queue consistency**
+  
+  
+  continue_connection() and continue_request() do not add or remove the request_node from queues. This behavior is in the worker() function, making it easier to prevent double free errors. Additionally, the queue mutex and the processing flag on the resource queue prevent workers from working on more than one request from the same resource queue at the same time.
+
+
   **Dispatcher specific behavior**
 
-  The dispatcher behavior is part of main() and runs indefinitely. It accepts incoming connections and creates socket descriptors for them, adding a node containing the socket descriptor to the work queue. Then it signals the work queue conditional variable to let worker threads know that they can consume nodes from the work queue. This is to signal the worker threads to continue consuming nodes if the work queue was previously empty. 
+
+  The dispatcher behavior is part of main() and runs indefinitely. It accepts incoming connections and creates socket descriptors for them, storing them in a request_node. First it gets the queue mutex, then adds a resource queue if there is no existing resource queue for the resource in the request. Then it adds a request_node to the tail of the proper resource queue. The dispatcher is allowed to add new request nodes to the end any resource queue regardless of the processing status flag. 
 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
