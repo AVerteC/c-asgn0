@@ -405,10 +405,14 @@ I added four functions to implement the functionality of the linked list and que
   
   
   `continue_connection(request_node)`
+  
+  
     This function is similar to handle_connection, but it has the added functionality of being able to respond to partial requests and continue them if the complete header hasn't been sent yet. Handle_connection is no longer called.
    
   
   `continue_request(request_node)`
+  
+  
     This function combines the functionality of handle_put() and handle_append() into one function. It reads attributes from request_node and does file existence checks to determine whether to send 200 OK or 201 Created to the client. It also supports resuming from a partial PUT or APPEND request where the request body has not been completely sent yet.
     
   
