@@ -387,6 +387,24 @@ I added four functions to implement the functionality of the linked list and que
   
   <p align="right">(<a href="#top">back to top</a>)</p>
 
+### Work Queue Superstructure
+  
+  
+  In order to add atomicity and concurrency to requests for resources hosted on the server, I redesigned the work queue structure from asgn3. This new structure consists of a queue of queues (Work Queue Superstructure). The top level of queues have a resource attribute, and requests that contain a resource are added to the tail of the resource queue. If there are no resource queues for a resource, a new resource queue will be created. This is similar to a 2D linked list array. If a resource queue has zero nodes, it will be removed.
+  
+  
+  **Worker specific behavior**
+  
+  
+  When worker threads get a request from the Work Queue Superstructure, they get the queue mutex lock first. Then they take a request node from the head of any of the resource queues that do not have the processing flag as true on the resource queue. Worker threads cannot get requests from resource queues that have the processing flag as true. When the request that the worker gets is stuck and needs polling, the worker will poll the request. If the request has content to read, then the worker thread continues the request with continue_request or continue_connection when needed. Otherwise, the worker thread will get the queue mutex lock and add the request to the head of the corresponding resource queue, then unlock the queue mutex lock.  
+  
+  **Dispatcher specific behavior**
+
+  The dispatcher behavior is part of main() and runs indefinitely. It accepts incoming connections and creates socket descriptors for them, adding a node containing the socket descriptor to the work queue. Then it signals the work queue conditional variable to let worker threads know that they can consume nodes from the work queue. This is to signal the worker threads to continue consuming nodes if the work queue was previously empty. 
+
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
 ### Dispatcher_Thread
 
 
