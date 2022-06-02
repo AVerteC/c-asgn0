@@ -399,7 +399,7 @@ I added four functions to implement the functionality of the linked list and que
   **Worker specific behavior**
   
   
-  When worker threads get a request from the Work Queue Superstructure, they get the queue mutex lock first. Then they take a request node from the head of any of the resource queues that do not have the processing flag as true on the resource queue. Worker threads cannot get requests from resource queues that have the processing flag as true. When the request that the worker gets is stuck and needs polling, the worker will poll the request. If the request has content to read, then the worker thread continues the request with continue_request or continue_connection when needed. Otherwise, the worker thread will get the queue mutex lock and add the request to the head of the corresponding resource queue, then unlock the queue mutex lock, and set the resource queue's processing flag to false.
+  When worker threads get a request from the Work Queue Superstructure, they get the queue mutex lock first. Then they take a request node from the head of any of the resource queues that do not have the processing flag as true on the resource queue. Worker threads cannot get requests from resource queues that have the processing flag as true. When the request that the worker gets is stuck and needs polling, the worker will poll the request. If the request has content to read, then the worker thread continues the request with continue_request or continue_connection when needed. Otherwise, if the request is stuck, the worker thread will get the queue mutex lock and add the request to the head of the corresponding resource queue to be processed again, then unlock the queue mutex lock, and set the resource queue's processing flag to false.
   
   **Additional functions**
   
@@ -422,18 +422,10 @@ I added four functions to implement the functionality of the linked list and que
   continue_connection() and continue_request() do not add or remove the request_node from queues. This behavior is in the worker() function, making it easier to prevent double free errors. Additionally, the queue mutex and the processing flag on the resource queue prevent workers from working on more than one request from the same resource queue at the same time.
 
 
-  **Dispatcher specific behavior**
-
-
-  The dispatcher behavior is part of main() and runs indefinitely. It accepts incoming connections and creates socket descriptors for them, storing them in a request_node. First it gets the queue mutex, then adds a resource queue if there is no existing resource queue for the resource in the request. Then it adds a request_node to the tail of the proper resource queue. The dispatcher is allowed to add new request nodes to the end any resource queue regardless of the processing status flag. 
-
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
 ### Dispatcher_Thread
 
 
-  The dispatcher behavior is part of main() and runs indefinitely. It accepts incoming connections and creates socket descriptors for them, adding a node containing the socket descriptor to the work queue. Then it signals the work queue conditional variable to let worker threads know that they can consume nodes from the work queue. This is to signal the worker threads to continue consuming nodes if the work queue was previously empty. 
+  The dispatcher behavior is part of main() and runs indefinitely. It accepts incoming connections and creates socket descriptors for them, storing them in a request_node. First it gets the queue mutex, then adds a resource queue if there is no existing resource queue for the resource in the request. Then it adds a request_node to the tail of the proper resource queue. The dispatcher is allowed to add new request nodes to the end any resource queue regardless of the processing status flag. 
 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
