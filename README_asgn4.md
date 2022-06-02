@@ -452,6 +452,8 @@ The worker thread will
 Worker threads running continue_connection() and continue_request() can detect if they are stuck by checking the read() and write() return values for `-1` and `EAGAIN`. Then the worker will get the queue mutex, store the stuck request back at the head of the corresponding resource queue in the Work Queue Superstructure, release the queue mutex, and set the resource queue's processing flag to false. All worker threads are capable of polling and the processing flag of the Work Queue Superstructure prevents worker threads from polling multiple requests for the same resource at the same time. 
 
 
+<p align="right">(<a href="#top">back to top</a>)</p>
+
 ### Extra Design Considerations
 I use a large buffer size of 2KB to read in large chunks of input and file data quickly, instead of calling read() on every byte.
 Since main() handles closing the socket, none of my functions need to close the socket.
