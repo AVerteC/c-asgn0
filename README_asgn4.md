@@ -351,41 +351,41 @@ I added four functions to implement the functionality of the linked list and que
 1. `void addNode(Queue *queue, int connfd)`
   
   
-  This function adds a node with the specified socket descriptor to the queue in the function arguments.
-  If the queue is null it returns an error. Otherwise it allocates the memory required for a new node, assigning its socket descriptor value and adds it to the end of the list. 
+  This function adds a node with the specified socket descriptor `connfd` to the queue in the function arguments.
+  If the queue `queue` is null it returns an error. Otherwise it allocates the memory required for a new node, assigning its socket descriptor value and adds it to the end of the list. 
   
   
   
-1. `void addNodeObject(Queue *queue, Node *target)`
+2. `void addNodeObject(Queue *queue, Node *target)`
   
   
-  This function adds a node object to the queue in the function arguments.
-  If the queue is null it returns an error. Otherwise it adds the node object to t, assigning its socket descriptor value and adds it to the end of the list. 
+  This function adds a node object `target` to the queue in the function arguments.
+  If the queue is null it returns an error. Otherwise it adds the node object to the queue `queue`, assigning its socket descriptor value and adds it to the end of the list. 
 
 
-2. `Node *removeNode(Queue *queue)`
+3. `Node *removeNode(Queue *queue)`
 
 
-  This function removes a node from the head of the queue, returning the pointer to the node itself. If the queue is null it returns an error. The caller function needs to free() the node after it is done using it to prevent memory leaks.
+  This function removes a node from the head of the queue `queue`, returning the pointer to the node itself. If the queue `queue` is null it returns an error. The caller function needs to free() the node after it is done using it to prevent memory leaks.
   
 
-3. `Node *removeNodeAnywhere(Queue *queue, Node *target)`
+4. `Node *removeNodeAnywhere(Queue *queue, Node *target)`
 
 
-  This function removes a node from the anywhere in the queue, disconnecting the forward and backward links of the node, then reassembling the connection of the nodes surrounding the removed node, returning the pointer to the node itself. If the queue is null it returns an error. The caller function needs to free() the node after it is done using it to prevent memory leaks.  
+  This function removes a node `target` from the anywhere in the queue `queue`, disconnecting the forward and backward links of the node `target`, then reassembling the connection of the nodes surrounding the removed node `target`, returning the pointer to the node `target` itself. If the queue `queue` is null it returns an error. The caller function needs to free() the node `target` after it is done using it to prevent memory leaks.  
 
 
-4. `void printNode(Node *node)`
+5. `void printNode(Node *node)`
 
 
   This function will run only if the DEBUG flag is set to 1.
-  This function is a debugging function that prints out the socket descriptor value belonging to the queue node in the function arguments.
+  This function is a debugging function that prints out the socket descriptor value belonging to the queue node `node` in the function arguments.
   
 6. `void printQueue(Queue *queue)`
 
 
   This function will run only if the DEBUG flag is set to 1.
-  This function is a debugging function that prints out all of the socket descriptor values of the nodes in the queue from head to tail. 
+  This function is a debugging function that prints out all of the socket descriptor values of the nodes in the queue `queue` from head to tail. 
   If the queue is null it returns an error.
   
   <p align="right">(<a href="#top">back to top</a>)</p>
@@ -399,7 +399,13 @@ I added four functions to implement the functionality of the linked list and que
   **Worker specific behavior**
   
   
-  When worker threads get a request from the Work Queue Superstructure, they get the queue mutex lock first. Then they take a request node from the head of any of the resource queues that do not have the processing flag as true on the resource queue. Worker threads cannot get requests from resource queues that have the processing flag as true. When the request that the worker gets is stuck and needs polling, the worker will poll the request. If the request has content to read, then the worker thread continues the request with continue_request or continue_connection when needed. Otherwise, if the request is stuck, the worker thread will get the queue mutex lock and add the request to the head of the corresponding resource queue to be processed again, then unlock the queue mutex lock, and set the resource queue's processing flag to false.
+  When worker threads get a request from the Work Queue Superstructure, they get the queue mutex lock first. Then they take a request node from the head of any of the resource queues that do not have the processing flag as true on the resource queue. Worker threads cannot get requests from resource queues that have the processing flag as true. When the request that the worker gets is stuck and needs polling, the worker will poll the request. If the request has content to read, then the worker thread continues the request with continue_request or continue_connection when needed. 
+  
+Otherwise, if the request is stuck:
+
+The worker thread will
+1. the worker thread will get the queue mutex lock
+2. add the request to the head of the corresponding resource queue to be processed again, then unlock the queue mutex lock, and set the resource queue's processing flag to false.
   
   **Additional functions**
   
@@ -443,8 +449,7 @@ I added four functions to implement the functionality of the linked list and que
 
 ### Non-Blocking_I/0
 
-Poll queue
-Thread 0 polls for all of the file descriptors in the poll queue using poll
+Worker threads running continue_connection() and continue_request() can detect if they are stuck by checking the read() and write() return values for `-1` and `EAGAIN`. Then the worker will get the queue mutex, store the stuck request back at the head of the corresponding resource queue in the Work Queue Superstructure, release the queue mutex, and set the resource queue's processing flag to false. All worker threads are capable of polling and the processing flag of the Work Queue Superstructure prevents worker threads from polling multiple requests for the same resource at the same time. 
 
 
 ### Extra Design Considerations
